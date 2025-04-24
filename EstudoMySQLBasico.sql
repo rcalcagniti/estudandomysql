@@ -1,4 +1,4 @@
-
+# Link para base das tabelas: https://github.com/AlexTheAnalyst/MySQL-YouTube-Series/blob/main/Beginner%20-%20Parks_and_Rec_Create_db.sql
 
 SELECT * 
 FROM parks_and_recreation.employee_demographics; #Erro: Code: 1046. NO database selected - faltou selecionar o database, que coloca antes da tabela e depois um ponto
