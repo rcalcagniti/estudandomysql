@@ -1,0 +1,254 @@
+# Link para base das tabelas: https://github.com/AlexTheAnalyst/MySQL-YouTube-Series/blob/main/Beginner%20-%20Parks_and_Rec_Create_db.sql
+#Joins - junta dados, junta colunas com dados parecidos
+SELECT *
+FROM parks_and_recreation.employee_demographics;
+
+SELECT *
+FROM parks_and_recreation.employee_salary;
+
+SELECT *
+FROM parks_and_recreation.employee_demographics
+JOIN parks_and_recreation.employee_salary
+	ON parks_and_recreation.employee_demographics.employee_id = parks_and_recreation.employee_salary.employee_id;
+#employee_id é igual em ambas, por isso conseguimos juntar - mas lembre-se de colocar de onde vem
+#no resultado, o employee id 2 nao aparece porque nao existe dentro da tabela demographics
+
+SELECT *
+FROM parks_and_recreation.employee_demographics AS dem
+LEFT JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id;
+#nao muda o resultado anterior, porque a left table que é demographics nao tem dentro o employee_id 2
+
+SELECT *
+FROM parks_and_recreation.employee_demographics AS dem
+RIGHT JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id;
+#aqui aparece o employee_id 2, mas com NULL na linha que nao tem nada
+
+#self join junta a tabela nela mesma
+SELECT *
+FROM parks_and_recreation.employee_salary AS sal1
+JOIN parks_and_recreation.employee_salary AS sal2
+	ON  sal1.employee_id + 1 = sal2.employee_id;
+#aqui você pode juntar os funcionario em pares por exemplo, para um jogo ou qualquer coisa assim
+
+#vamos limpar o resultado anterior:
+SELECT sal1.employee_id AS sal1_amigosecreto,
+sal1.first_name AS sal1_amigosecreto_nome,
+sal2.employee_id AS sal2_amigosecretorecebe,
+sal2.first_name AS sal2_amigosecretoreceb_nome
+FROM parks_and_recreation.employee_salary AS sal1
+JOIN parks_and_recreation.employee_salary AS sal2
+	ON  sal1.employee_id + 1 = sal2.employee_id;
+
+
+#como juntar multiplas tabelas? Como juntar com tabelas de referencia como parks_departments - é quase um procv com essa tabela
+SELECT *
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id
+JOIN parks_and_recreation.parks_departments AS dp #ela nao tem uma coluna em comum com demographics, só com salary
+	ON sal.dept_id = dp.department_id; #o nome da coluna sao diferentes, mas os dados sao os mesmo
+    
+    
+#UNIONS
+#Unions combina linhas (Join combina linhas)
+SELECT age,gender
+FROM parks_and_recreation.employee_demographics
+UNION
+SELECT first_name, last_name
+FROM parks_and_recreation.employee_salary;
+#O resultado vai ser age,gender nas primeiras linhas e depois primeiro nome e ultimo nome nas linhas seguintes - ou seja, nao ajudou em nada
+
+
+SELECT first_name, last_name
+FROM parks_and_recreation.employee_demographics
+UNION
+SELECT first_name, last_name
+FROM parks_and_recreation.employee_salary;
+#aqui vai mostrar todos os nomes e sobrenomes de ambas as tabelas, mas ja tirando as linhas duplicadas (UNION DISTINCT é o padrao de UNION)alter
+
+SELECT first_name, last_name
+FROM parks_and_recreation.employee_demographics
+UNION ALL
+SELECT first_name, last_name
+FROM parks_and_recreation.employee_salary;
+#Aqui vai mostrar todos os nomes e sobrenomes de ambas as tabelas, sem tirar os duplicados (ex: craig aparec vezes)
+
+SELECT first_name, last_name, 'Old' As NewCollumn
+FROM parks_and_recreation.employee_demographics
+WHERE age > 50
+UNION 
+SELECT first_name, last_name, 'High Paid Employee' As NewCollumn2
+FROM parks_and_recreation.employee_salary
+WHERE salary > 70000;
+#aqui vai mostrar pessoas com acima de 50 anos OU que ganhem mais de 70k 
+
+SELECT first_name, last_name, 'Old MAn' As NewCollumn
+FROM parks_and_recreation.employee_demographics
+WHERE age > 40 AND gender = 'Male' 
+UNION
+SELECT first_name, last_name, 'Old Lady' As NewCollumn
+FROM parks_and_recreation.employee_demographics
+WHERE age > 40 AND gender = 'Female' 
+UNION 
+SELECT first_name, last_name, 'High Paid Employee' As NewCollumn2
+FROM parks_and_recreation.employee_salary
+WHERE salary > 70000;
+#Aqui vai trazer resultados duplicados, porque Chris e Leslie são pessoas ganham mais de 70k e sao acima de 40 anos
+
+SELECT first_name, last_name, 'Old MAn' As NewCollumn
+FROM parks_and_recreation.employee_demographics
+WHERE age > 40 AND gender = 'Male' 
+UNION
+SELECT first_name, last_name, 'Old Lady' As NewCollumn
+FROM parks_and_recreation.employee_demographics
+WHERE age > 40 AND gender = 'Female' 
+UNION 
+SELECT first_name, last_name, 'High Paid Employee' As NewCollumn2
+FROM parks_and_recreation.employee_salary
+WHERE salary > 70000
+ORDER BY first_name, last_name; # aqui vai deixar os valores duplicados mais claros
+
+
+#CASE STATEMENT - adiciona logica, como if/else
+SELECT *
+FROM parks_and_recreation.employee_demographics;
+
+SELECT *
+FROM parks_and_recreation.employee_salary;
+
+Select *
+FROM parks_and_recreation.parks_departments;
+
+SELECT first_name, last_name, age, #diferente dos outros, o SELECT precisa terminar com ',' para o CASE funcionar
+CASE
+	WHEN age <= 30 THEN 'Young'
+END
+  
+FROM parks_and_recreation.employee_demographics;
+
+#pode ter diversos WHEN dentro do mesmo Case
+SELECT first_name, last_name, age, 
+CASE
+	WHEN age <= 30 THEN 'Young'
+    WHEN age BETWEEN 31 and 50 THEN 'Adult'
+    WHEN age > 50 THEN 'Old'
+END AS Age_Bracket #nomeia a coluna do CASE
+FROM parks_and_recreation.employee_demographics;
+
+#vamos fazer um select para aplicar um bonus aos funcionarios
+-- pay increase by salay:
+-- < 50k - 5% salary increase
+-- >50k - 7% salary increase
+-- Finance = 10% bonus 
+SELECT *,
+CASE
+	WHEN salary < 50000 THEN salary + (salary *0.05)
+    WHEN salary > 50000 THEN salary * 1.07
+END AS New_Salary, #se for fazer mais um case, lembre-se de colocar a ',' no final
+Case
+	WHEN dept_id = 6 THEN salary *1.1 #dentro da tabela Parks_departments vemos que o ID de finance é 6 - por iso estamos filtrando por 6
+END AS Bonus
+FROM parks_and_recreation.employee_salary;
+
+
+#subqueries - queries dentro de queries
+SELECT *
+FROM parks_and_recreation.employee_demographics;
+
+SELECT *
+FROM parks_and_recreation.employee_salary;
+
+Select *
+FROM parks_and_recreation.parks_departments;
+
+
+SELECT *
+FROM parks_and_recreation.employee_demographics
+WHERE employee_id IN #buscar employees ID que estao dentro da salary
+					(SELECT employee_id
+					FROM parks_and_recreation.employee_salary
+					WHERE dept_id =1);
+                    
+SELECT *
+FROM parks_and_recreation.employee_demographics
+WHERE employee_id IN 
+					(SELECT employee_id, dept_id #se tentar rodar vai dar erro porque tem mais de uma select no subqueri, so pode ter um select
+					FROM parks_and_recreation.employee_salary
+					WHERE dept_id =1);
+
+
+SELECT first_name, salary, AVG(salary)
+FROM parks_and_recreation.employee_salary
+GROUP By first_name, salary; #o AVG salary é por linha, entao o resultado esta mostrando salary = avg salary
+
+SELECT first_name, salary, 
+	(SELECT AVG (salary) #subquerie dentro do querie, pega o valor nele mesmo para pegar o avg salary da tabela (nao por linha)
+	FROM parks_and_recreation.employee_salary)
+FROM parks_and_recreation.employee_salary; #aqui o salary vai ser diferente do avg salary, o avg salary vai ser igual para todos
+
+#window functions - permite olhar um grupo com valores unicos de linha
+SELECT *
+FROM parks_and_recreation.employee_demographics;
+
+SELECT *
+FROM parks_and_recreation.employee_salary;
+
+Select *
+FROM parks_and_recreation.parks_departments;
+
+SELECT gender, AVG (salary)
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id
+GROUP BY gender; #o resultado vai trazer female e male em linha separadas, cada um com a seu respectivo salary
+
+SELECT gender, AVG (salary) OVER ()
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id; #aqui mostra todas as linhas, porque está mostrando o OVER para todo mundo
+#group by nao funciona aqui
+
+SELECT dem.first_name, dem.last_name, gender, AVG (salary) OVER (PARTITION BY gender) #aqui nao esta agrupando, está calculando o avg baseado em cada gender, o resultado é o mesmo, mas a forma de calculo é diferente
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id; #e por causa do OVER, ainda mostra todas as linhas
+
+
+SELECT dem.first_name, dem.last_name, gender, salary, SUM(salary) OVER (PARTITION BY gender ORDER BY dem.employee_id) 
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id; #o resultado aqui da para ver ele adicionando em cada linha, diferente do AVG, e para de calcular quando termna o female
+
+
+SELECT dem.employee_id, dem.first_name, dem.last_name, gender, salary, ROW_NUMBER() OVER () 
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id; #row_number é igual ao employee_id
+    
+SELECT dem.employee_id, dem.first_name, dem.last_name, gender, salary, ROW_NUMBER() OVER (PARTITION BY gender) 
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id; #aqui o row_number é baseado no genero (para no 4 para mulher e 5 para homem)
+
+SELECT dem.employee_id, dem.first_name, dem.last_name, gender, salary, ROW_NUMBER() OVER (partition by gender order by salary desc) 
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id; #aqui o resultado organiza com base no salario e genero, colocando primeiro quem ganha mais de acordo com cada genero
+    
+    
+SELECT dem.employee_id, dem.first_name, dem.last_name, gender, salary, 
+ROW_NUMBER() OVER (partition by gender order by salary desc),
+RANK () OVER (partition by gender order by salary DESC)
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id; #os resultado sao bem parecidos, a diferença vai estar em TOM e Jerry , como tem o mesmo salario, RANK coloca o mesmo numero, enquanto row-numver coloca aleatoriamente 
+    
+SELECT dem.employee_id, dem.first_name, dem.last_name, gender, salary, 
+ROW_NUMBER() OVER (partition by gender order by salary desc), #TOM é 5, Jerry é 6, Andy é 7
+RANK () OVER (partition by gender order by salary DESC), #TOM é 5, Jerry é 5, Andy é 7
+dense_rank () OVER (partition by gender order by salary DESC) #TOM é 5, Jerry é 5, Andy é 6
+FROM parks_and_recreation.employee_demographics AS dem
+JOIN parks_and_recreation.employee_salary AS sal
+	ON dem.employee_id = sal.employee_id;
