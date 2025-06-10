@@ -1,5 +1,7 @@
 # estudandomysql
 
+All of my notes, exercises description and solutions will be in portuguese because I believe most of this you can find in another website in english, but not in portuguese. 
+So the purpose here is to share knowledge with my fellow portuguese speakers that want to lear code but is not fluent in english. <br>
 
 todos os exercicios tiveram como fonte o <a href="http://w3resource.com/mysql-exercises/"> w3resource </a> 
 ou um treinamento de bootcamp em ingles do <a href="https://www.youtube.com/watch?v=rGx1QNdYzvs&list=PLUaB-1hjhk8FE_XZ87vPPSfHqb6OcM0cF"> youtube </a>. 
