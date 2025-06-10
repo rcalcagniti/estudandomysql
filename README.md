@@ -9,7 +9,8 @@ Neste file estao os exercicios do video do  <a href="https://www.youtube.com/wat
 1. Remover duplicados
 2. padronizar os dados/data 
 3. Verificar dados NULL e/ou blank 
-4. remover colunas e linhas desnecessarias 
+4. remover colunas e linhas desnecessarias
+<a href="https://github.com/rcalcagniti/estudandomysql/blob/main/Projeto%20Data%20Cleaning.sql">Aqui</a> está a resoluçao de todas as partes
 
 ## Estes são os exercícios do w3resources
 todos os exercícios podem ser encontrados <a href="http://w3resource.com/mysql-exercises/">aqui</a> e a resoluçao <a href="https://github.com/rcalcagniti/estudandomysql/blob/main/Estudos%20MySQL%20W2Resource.sql">aqui</a>- escolhi fazer aqueles que me eram mais interessantes.
